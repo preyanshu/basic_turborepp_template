@@ -134,7 +134,11 @@ export class MPCClient {
     // allSecretShares[j][partyIndex] is the share that party j gave to this party
     const partySecretShares: SecretShare[] = [];
     for (let j = 0; j < shareCount; j++) {
-      partySecretShares.push(allSecretShares[j][partyIndex]);
+      const share = allSecretShares[j]?.[partyIndex];
+      if (!share) {
+        throw new ValidationError(`Missing secret share from party ${j} for party ${partyIndex}`);
+      }
+      partySecretShares.push(share);
     }
 
     // Convert to 1-indexed for VSS
@@ -171,8 +175,12 @@ export class MPCClient {
     if (!sharedKeys || sharedKeys.length === 0) {
       throw new ValidationError("No shared keys provided");
     }
+    const firstKey = sharedKeys[0];
+    if (!firstKey) {
+      throw new ValidationError("First shared key is undefined");
+    }
     return {
-      aggregatePublicKey: sharedKeys[0].y,
+      aggregatePublicKey: firstKey.y,
       sharedKeys: sharedKeys,
     };
   }
@@ -291,7 +299,11 @@ export class MPCClient {
     // Collect ephemeral secret shares for this party from all signing parties
     const partyEphSecretShares: SecretShare[] = [];
     for (let j = 0; j < signingParties.length; j++) {
-      partyEphSecretShares.push(allEphSecretShares[j][partyIndex]);
+      const share = allEphSecretShares[j]?.[partyIndex];
+      if (!share) {
+        throw new ValidationError(`Missing ephemeral secret share from party ${j} for party ${partyIndex}`);
+      }
+      partyEphSecretShares.push(share);
     }
 
     // Convert to 1-indexed for VSS

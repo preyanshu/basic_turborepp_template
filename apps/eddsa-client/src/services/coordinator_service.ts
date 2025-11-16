@@ -224,6 +224,9 @@ export class CoordinatorService {
     const result: ShareData = {};
     for (let i = 0; i < shareCount; i++) {
       const party = this.parties[i];
+      if (!party) {
+        throw new PartyError(`Party at index ${i} is undefined`);
+      }
       if (party.protocolIndex === undefined) {
         throw new PartyError(`Party ${party.partyId} has no protocolIndex`);
       }
@@ -526,7 +529,13 @@ export class CoordinatorService {
     const result: EphemeralShareData = {};
     for (let i = 0; i < this.signingPartyIndices.length; i++) {
       const partyIdx = this.signingPartyIndices[i];
+      if (partyIdx === undefined) {
+        throw new StateError(`Signing party index at position ${i} is undefined`);
+      }
       const party = this.parties[partyIdx];
+      if (!party) {
+        throw new StateError(`Party at index ${partyIdx} is undefined`);
+      }
 
       result[party.partyId] = {
         threshold,
@@ -584,6 +593,9 @@ export class CoordinatorService {
     // Ensure aggregateR has Array bytes before coordinator service accesses it
     if (this.ephSharedKeys.length > 0) {
       const firstKey = this.ephSharedKeys[0];
+      if (!firstKey) {
+        throw new StateError("First ephemeral shared key is undefined");
+      }
       const aggregateR = firstKey.r || firstKey.R;
       if (aggregateR && aggregateR.bytes) {
         if (!Array.isArray(aggregateR.bytes)) {
@@ -607,7 +619,14 @@ export class CoordinatorService {
     );
 
     // Generate final signature
-    const aggregateR = this.ephSharedKeys[0].r || this.ephSharedKeys[0].R;
+    if (this.ephSharedKeys.length === 0) {
+      throw new StateError("No ephemeral shared keys available");
+    }
+    const firstEphKey = this.ephSharedKeys[0];
+    if (!firstEphKey) {
+      throw new StateError("First ephemeral shared key is undefined");
+    }
+    const aggregateR = firstEphKey.r || firstEphKey.R;
     if (!aggregateR) {
       throw new StateError("Aggregate R not found");
     }
@@ -719,6 +738,9 @@ export class CoordinatorService {
 
     for (let i = 0; i < shareCount; i++) {
       const party = this.parties[i];
+      if (!party) {
+        throw new PartyError(`Party at index ${i} is undefined`);
+      }
       if (party.protocolIndex === undefined) {
         throw new PartyError(`Party ${party.partyId} has no protocolIndex`);
       }
@@ -789,7 +811,13 @@ export class CoordinatorService {
 
     for (let i = 0; i < this.signingPartyIndices.length; i++) {
       const partyIdx = this.signingPartyIndices[i];
+      if (partyIdx === undefined) {
+        throw new StateError(`Signing party index at position ${i} is undefined`);
+      }
       const party = this.parties[partyIdx];
+      if (!party) {
+        throw new StateError(`Party at index ${partyIdx} is undefined`);
+      }
 
       result[party.partyId] = {
         threshold,
