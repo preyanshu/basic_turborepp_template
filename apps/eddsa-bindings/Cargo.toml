@@ -8,7 +8,7 @@ authors = ["Multi-party EdDSA Contributors"]
 crate-type = ["cdylib"]
 
 [dependencies]
-multi-party-eddsa = { path = "../multi-party-eddsa-rust" }
+multi-party-eddsa = { path = "../eddsa-core" }
 curv = { package = "curv-kzen", version = "0.9", default-features = false }
 napi = { version = "2", default-features = false, features = ["napi4", "serde-json"] }
 napi-derive = "2"
