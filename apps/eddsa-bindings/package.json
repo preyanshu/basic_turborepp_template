@@ -6,8 +6,7 @@
   "types": "index.d.ts",
   "scripts": {
     "build": "napi build --platform --release",
-    "build:debug": "napi build --platform",
-    "test": "node example.js"
+    "build:debug": "napi build --platform"
   },
   "keywords": [
     "eddsa",
