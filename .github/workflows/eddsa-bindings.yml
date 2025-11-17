@@ -1,0 +1,137 @@
+name: Eddsa Bindings CI
+
+on:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  pull_request:
+    branches:
+      - main
+
+env:
+  NODE_VERSION: '20'
+  BINDINGS_DIR: apps/eddsa-bindings
+
+jobs:
+  build:
+    name: Build (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            artifact: linux-x64-gnu
+          - os: macos-13
+            target: x86_64-apple-darwin
+            artifact: darwin-x64
+          - os: macos-14
+            target: aarch64-apple-darwin
+            artifact: darwin-arm64
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact: win32-x64-msvc
+    env:
+      RUST_TARGET: ${{ matrix.target }}
+    defaults:
+      run:
+        working-directory: ${{ env.BINDINGS_DIR }}
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: ${{ env.BINDINGS_DIR }}/package-lock.json
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Cache cargo build
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: ${{ env.BINDINGS_DIR }}
+          cache-on-failure: true
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build native addon
+        run: npm run build -- --target ${{ matrix.target }}
+
+      - name: Upload binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: bindings-${{ matrix.target }}
+          path: |
+            ${{ env.BINDINGS_DIR }}/multi-party-eddsa-node.${{ matrix.artifact }}.node
+          if-no-files-found: error
+
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-22.04
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    environment:
+      name: prod
+    defaults:
+      run:
+        working-directory: ${{ env.BINDINGS_DIR }}
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Scaffold npm platform packages
+        run: npx napi create-npm-dir -t .
+
+      - name: Download platform binaries
+        uses: actions/download-artifact@v4
+        with:
+          pattern: bindings-*
+          path: ${{ env.BINDINGS_DIR }}/artifacts
+          merge-multiple: true
+
+      - name: Copy artifacts into npm packages
+        run: npx napi artifacts --dir artifacts --dist npm
+
+      - name: Configure npm auth
+        run: |
+          npm config set provenance true
+          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Publish platform-specific packages
+        run: npx napi prepublish -t npm --skip-gh-release
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish main package
+        run: |
+          if [[ "${GITHUB_REF_NAME}" == *"-"* ]]; then
+            npm publish --access public --tag next
+          else
+            npm publish --access public
+          fi
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
