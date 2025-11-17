@@ -18,7 +18,7 @@ rand = "0.8"
 sha2 = "0.9"
 
 [target.'cfg(target_os = "windows")'.dependencies]
-curv = { package = "curv-kzen", version = "0.9", default-features = false, features = ["no-gmp"] }
+curv = { package = "curv-kzen", version = "0.9", default-features = false }
 
 [target.'cfg(not(target_os = "windows"))'.dependencies]
 curv = { package = "curv-kzen", version = "0.9", default-features = false, features = ["rust-gmp-kzen"] }
