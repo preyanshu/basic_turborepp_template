@@ -76,19 +76,16 @@ jobs:
         shell: pwsh
         run: choco install llvm -y
 
-      - name: Install GMP (Windows)
+      - name: Install GMP via vcpkg (Windows)
         if: startsWith(matrix.os, 'windows')
         shell: pwsh
         run: |
-          choco install msys2 --no-progress -y
-          C:\tools\msys64\usr\bin\bash -lc "pacman -Sy --noconfirm mingw-w64-x86_64-gmp"
-
-      - name: Set GMP paths
-        if: startsWith(matrix.os, 'windows')
-        shell: pwsh
-        run: |
-          echo "GMP_LIB_DIR=C:\tools\msys64\mingw64\lib" >> $env:GITHUB_ENV
-          echo "GMP_INCLUDE_DIR=C:\tools\msys64\mingw64\include" >> $env:GITHUB_ENV
+          git clone https://github.com/microsoft/vcpkg --depth=1 C:\vcpkg
+          cd C:\vcpkg
+          .\bootstrap-vcpkg.bat
+          .\vcpkg install gmp:x64-windows-static
+          echo "GMP_LIB_DIR=C:\vcpkg\installed\x64-windows-static\lib" >> $env:GITHUB_ENV
+          echo "GMP_INCLUDE_DIR=C:\vcpkg\installed\x64-windows-static\include" >> $env:GITHUB_ENV
 
       - name: Cache cargo build
         uses: Swatinem/rust-cache@v2
