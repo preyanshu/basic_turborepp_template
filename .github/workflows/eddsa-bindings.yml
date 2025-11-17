@@ -61,7 +61,15 @@ jobs:
 
       - name: Install GMP (macOS)
         if: startsWith(matrix.os, 'macos')
-        run: brew install gmp
+        run: |
+          brew install gmp
+          if [ -d "/opt/homebrew/opt/gmp" ]; then
+            echo "LIBRARY_PATH=/opt/homebrew/opt/gmp/lib:$LIBRARY_PATH" >> $GITHUB_ENV
+            echo "CPATH=/opt/homebrew/opt/gmp/include:$CPATH" >> $GITHUB_ENV
+          elif [ -d "/usr/local/opt/gmp" ]; then
+            echo "LIBRARY_PATH=/usr/local/opt/gmp/lib:$LIBRARY_PATH" >> $GITHUB_ENV
+            echo "CPATH=/usr/local/opt/gmp/include:$CPATH" >> $GITHUB_ENV
+          fi
 
       - name: Install GMP (Windows)
         if: startsWith(matrix.os, 'windows')
