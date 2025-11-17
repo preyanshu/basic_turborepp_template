@@ -80,13 +80,15 @@ jobs:
         if: startsWith(matrix.os, 'windows')
         shell: pwsh
         run: |
-          choco install msys2 -y
-          refreshenv
-          C:\tools\msys64\usr\bin\bash -lc "pacman -Sy --noconfirm --needed mingw-w64-x86_64-gmp"
-          echo "GMP_LIB_DIR=C:\tools\msys64\mingw64\lib" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          echo "GMP_INCLUDE_DIR=C:\tools\msys64\mingw64\include" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          echo "LIB=C:\tools\msys64\mingw64\lib;$env:LIB" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-          echo "INCLUDE=C:\tools\msys64\mingw64\include;$env:INCLUDE" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+          choco install msys2 --no-progress -y
+          C:\tools\msys64\usr\bin\bash -lc "pacman -Sy --noconfirm mingw-w64-x86_64-gmp"
+
+      - name: Set GMP paths
+        if: startsWith(matrix.os, 'windows')
+        shell: pwsh
+        run: |
+          echo "GMP_LIB_DIR=C:\tools\msys64\mingw64\lib" >> $env:GITHUB_ENV
+          echo "GMP_INCLUDE_DIR=C:\tools\msys64\mingw64\include" >> $env:GITHUB_ENV
 
       - name: Cache cargo build
         uses: Swatinem/rust-cache@v2
