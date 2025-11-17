@@ -159,7 +159,7 @@ jobs:
 
       - name: Configure npm auth
         run: |
-          npm config set provenance true
+          npm config set --location=global provenance true
           echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
