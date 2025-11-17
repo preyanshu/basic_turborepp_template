@@ -4,11 +4,19 @@ on:
   push:
     branches:
       - main
-    tags:
-      - 'v*'
+    paths:
+      - 'apps/eddsa-bindings/src/**'
+      - 'apps/eddsa-bindings/Cargo.toml'
+      - 'apps/eddsa-bindings/Cargo.lock'
+      - '.github/workflows/eddsa-bindings.yml'
   pull_request:
     branches:
       - main
+    paths:
+      - 'apps/eddsa-bindings/src/**'
+      - 'apps/eddsa-bindings/Cargo.toml'
+      - 'apps/eddsa-bindings/Cargo.lock'
+      - '.github/workflows/eddsa-bindings.yml'
 
 env:
   NODE_VERSION: '20'
@@ -106,77 +114,4 @@ jobs:
             ${{ env.BINDINGS_DIR }}/multi-party-eddsa-node.${{ matrix.artifact }}.node
           if-no-files-found: error
 
-  publish:
-    name: Publish to npm
-    runs-on: ubuntu-22.04
-    needs: build
-    if: startsWith(github.ref, 'refs/tags/v')
-    environment:
-      name: prod
-    defaults:
-      run:
-        working-directory: ${{ env.BINDINGS_DIR }}
-        shell: bash
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-
-      - name: Setup Bun
-        uses: oven-sh/setup-bun@v1
-        with:
-          bun-version: '1.2.2'
-
-      - name: Install dependencies
-        run: bun install --frozen-lockfile
-
-      - name: Scaffold npm platform packages
-        run: npx napi create-npm-dir -t .
-
-      - name: Download platform binaries
-        uses: actions/download-artifact@v4
-        with:
-          pattern: bindings-*
-          path: ${{ env.BINDINGS_DIR }}/artifacts
-          merge-multiple: true
-
-      - name: Copy artifacts into npm packages
-        run: |
-          npx napi create-npm-dir -t .
-          mkdir -p npm
-          for artifact in artifacts/*.node; do
-            file=$(basename "$artifact")
-            platform=${file#multi-party-eddsa-node.}
-            platform=${platform%.node}
-            dest="npm/${platform}"
-            mkdir -p "$dest"
-            cp "$artifact" "$dest/multi-party-eddsa-node.node"
-          done
-
-      - name: Configure npm auth
-        run: |
-          npm config set --location=global provenance true
-          echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > ~/.npmrc
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-
-      - name: Publish platform-specific packages
-        run: npx napi prepublish -t npm --skip-gh-release
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish main package
-        run: |
-          if [[ "${GITHUB_REF_NAME}" == *"-"* ]]; then
-            npm publish --access public --tag next
-          else
-            npm publish --access public
-          fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 

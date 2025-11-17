@@ -33,7 +33,7 @@ dist
 **/Cargo.lock
 
 # Native bindings
-**/*.node
+# **/*.node
 
 # Test artifacts
 **/test-ledger/

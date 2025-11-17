@@ -1,10 +1,13 @@
 {
   "name": "multi-party-eddsa",
-  "version": "1.0.3",
+  "version": "1.0.5",
   "description": "Multi-Party EdDSA threshold signature library",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "type": "commonjs",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "watch": "tsc --watch",
@@ -45,9 +48,10 @@
   "license": "MIT",
   "dependencies": {
     "@solana/web3.js": "^1.98.4",
-    "multi-party-eddsa-node": "workspace:*"
+    "multi-party-eddsa-node": "^0.3.8"
   },
   "devDependencies": {
+    "@tsconfig/node18": "^18.2.4",
     "@jest/globals": "^30.2.0",
     "@repo/eslint-config": "*",
     "@repo/typescript-config": "*",

@@ -1,0 +1,12 @@
+.DS_Store
+node_modules
+src
+tests
+coverage
+tsconfig.json
+jest.config.js
+eslint.config.mjs
+tsconfig*.json
+*.tsbuildinfo
+
+

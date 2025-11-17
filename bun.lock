@@ -11,22 +11,23 @@
     },
     "apps/eddsa-bindings": {
       "name": "multi-party-eddsa-node",
-      "version": "0.3.0",
+      "version": "0.3.8",
       "devDependencies": {
         "@napi-rs/cli": "^2.0.0",
       },
     },
     "apps/eddsa-client": {
       "name": "multi-party-eddsa",
-      "version": "1.0.0",
+      "version": "1.0.4",
       "dependencies": {
         "@solana/web3.js": "^1.98.4",
-        "multi-party-eddsa-node": "workspace:*",
+        "multi-party-eddsa-node": "^0.3.8",
       },
       "devDependencies": {
         "@jest/globals": "^30.2.0",
         "@repo/eslint-config": "*",
         "@repo/typescript-config": "*",
+        "@tsconfig/node18": "^18.2.4",
         "@types/jest": "^30.0.0",
         "@types/node": "^24.10.1",
         "eslint": "^9.39.1",
@@ -299,6 +300,8 @@
     "@tsconfig/node14": ["@tsconfig/node14@1.0.3", "", {}, "sha512-ysT8mhdixWK6Hw3i1V2AeRqZ5WfXg1G43mqoYlM2nc6388Fq5jcXyr5mRsqViLx/GJYdoL0bfXD8nmF+Zn/Iow=="],
 
     "@tsconfig/node16": ["@tsconfig/node16@1.0.4", "", {}, "sha512-vxhUy4J8lyeyinH7Azl1pdd43GJhZH/tP2weN8TntQblOY+A0XbT8DJk1/oCPuOOyg/Ja757rG0CgHcWC8OfMA=="],
+
+    "@tsconfig/node18": ["@tsconfig/node18@18.2.5", "", {}, "sha512-nQicUR0hKCXwCTVByBMPKm+lWH4B+IquC9Y1KEe4oujGVFFKGTIpAFz5z/AwJooSocVAuTSWTe/7ey1nU+xrlA=="],
 
     "@tybys/wasm-util": ["@tybys/wasm-util@0.10.1", "", { "dependencies": { "tslib": "^2.4.0" } }, "sha512-9tTaPJLSiejZKx+Bmog4uSubteqTvFrVrURwkmHixBo0G4seD0zUxp98E1DzUBJxLQ3NPwXrGKDiVjwx/DpPsg=="],
 
