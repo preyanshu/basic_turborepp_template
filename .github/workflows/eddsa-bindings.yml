@@ -147,7 +147,15 @@ jobs:
       - name: Copy artifacts into npm packages
         run: |
           npx napi create-npm-dir -t .
-          npx napi artifacts --dir artifacts --dist npm
+          mkdir -p npm
+          for artifact in artifacts/*.node; do
+            file=$(basename "$artifact")
+            platform=${file#multi-party-eddsa-node.}
+            platform=${platform%.node}
+            dest="npm/${platform}"
+            mkdir -p "$dest"
+            cp "$artifact" "$dest/multi-party-eddsa-node.node"
+          done
 
       - name: Configure npm auth
         run: |
